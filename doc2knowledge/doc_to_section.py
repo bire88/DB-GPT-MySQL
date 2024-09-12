@@ -6,7 +6,7 @@ import os
 
 if __name__ == "__main__":
 
-    ROOT_DIR_NAME = "docs/enmo/reports"
+    ROOT_DIR_NAME = "C:/orcasql-mysqldevops/docs/TSG/TsgDocx"
 
     text_splitter = StructuredDocumentSplitter(
         keep_separator=True,

@@ -61,6 +61,7 @@ def id_sort(nodes, reverse=False):
     return sorted(nodes, key=lambda x: x['id'], reverse=reverse)
 
 def topo_sort(nodes):
+    print(f"before topo_sort: {nodes}")
     nodes = id_sort(nodes)
     for i, node in enumerate(nodes):
         nodes[i]['book'] = len(node['children'])
@@ -72,6 +73,7 @@ def topo_sort(nodes):
             nodes[v['father']]['book'] -= 1
             if not nodes[v['father']]['book']:
                 sorted_nodes.append(nodes[v['father']])
+    print(f"after topo_sort: {sorted_nodes}")
     return [{k:v for k,v in node.items() if k!='book'} for node in sorted_nodes]
 
 def read_txt(file_path):
@@ -105,12 +107,12 @@ class LLMCore(object):
         # if response is not None:
         #     return response
 
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = "5f1f406e1de0461b819ffa1c857f4dbb"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + api_key
+            "api-key": api_key
         }
-        url = "https://api.aiaiapi.com/v1/chat/completions"
+        url = "https://auto-rca.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2023-03-15-preview"
 
         cur_timeout = timeout
         while cur_timeout>0:

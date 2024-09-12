@@ -30,7 +30,7 @@ class QwenVllmChat(BaseChatModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.url = ONLINE_LLM_MODEL["qwen1.5-vllm"]["api_base_url"] + "/chat/completions"
+        self.url = ONLINE_LLM_MODEL["qwen1.5-vllm"]["api_base_url"] # + "/chat/completions"
         self.model_name_or_path = ONLINE_LLM_MODEL["qwen1.5-vllm"]["model_name"]
         self.generate_cfg.update(kwargs)
 

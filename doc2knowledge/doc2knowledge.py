@@ -8,7 +8,6 @@ def Initialize(doc, target_dir):
     CreateFolder(pjoin(doc, target_dir))
 
 def Summarize(idx, title, content, llm, summary_min_length=400):
-    
     return llm.Query(SUMMARIZE_PROMPT_MSG + MSG(CONTENT_TEMPLATE.format(idx=idx,title=title,content=content)))["content"] if len(content)>=summary_min_length else content
 
 def CascadingSummary(args):
@@ -26,6 +25,9 @@ def CascadingSummary(args):
     } for chunk_name in ListFiles(chunks_path) if chunk_name.endswith('.txt') or chunk_name.endswith('.doc') or chunk_name.endswith('.docx')]
 
     nodes_mapping = {node['id_str']: node for node in nodes}
+
+    print(f"length:{len(nodes_mapping)}")
+
     nodes_structure = {node['id_str']: {k:v for k,v in node.items() if k!='content'} for node in nodes}
     
     for node1, node2 in itertools.permutations(nodes_mapping.values(), 2):
@@ -37,9 +39,15 @@ def CascadingSummary(args):
     
     print("tree structure:", nodes_structure)
 
+    for node in nodes:
+        node['children'] = list(set(node['children']))
+
+    print(f"length:{len(nodes_mapping)}")
     nodes = topo_sort(list(nodes_mapping.values()))
+    print(f"length:{len(nodes)}")
     
     nodes_mapping = {node['id_str']: node for node in nodes}
+    print(f"length:{len(nodes_mapping)}")
     
     for i, v in enumerate(TQDM(nodes)):
         children = sorted([c for c in v['children']], key=lambda x:str2id(x))
@@ -97,6 +105,7 @@ def ExtractKnowledge(nodes_mapping, root_index, llm, iteration=2, iteration_gap=
         #print("Extraction Thought:\n" + COLOR1("```\n{0}\n```".format(response['content'])))
         
         response = {"function_call": {}}
+        print(f"function_response: {function_response}")
         if function_response != None and "function_call" in function_response:
             response["function_call"]["name"] = function_response["function_call"]["name"]
             response["function_call"]["arguments"] = function_response["function_call"]["arguments"]
@@ -105,23 +114,30 @@ def ExtractKnowledge(nodes_mapping, root_index, llm, iteration=2, iteration_gap=
             if response["function_call"]["name"] == "submit_rule":
                 
                 print("Extraction Action:", SUCCESS("Submitting a rule..."))
+                used_rules = []
                 try:
                     rule = response["function_call"]["arguments"]
 
                     print("rule:", rule)
 
+                    try:
+                        rule_dict = json.loads(rule)
+                    except json.JSONDecodeError as e:
+                        print(f"Failed to decode JSON: {e}")
+                        raise ValueError("Invalid JSON format")
+                    
                     # assert (rule.startswith('{\n  "rules": "') and rule.endswith('"\n}'))
 
-                    # rule = rule[len('{\n  "rules": '):-len('\n}')]
-                    rule = rule.replace('"{','{')
-                    # rule = rule.replace('"}','}')
-                    rule = rule.replace('}"','}')
-                    rule = rule.replace('\\"', '"')
+                    # # rule = rule[len('{\n  "rules": '):-len('\n}')]
+                    # rule = rule.replace('"{','{')
+                    # # rule = rule.replace('"}','}')
+                    # rule = rule.replace('}"','}')
+                    # rule = rule.replace('\\"', '"')
 
-                    if '['  in rule:
-                        rule = rule.replace('"[', '[')
-                        rule = rule.replace(']"', ']')
-                        rule = rule.strip()
+                    # if '['  in rule:
+                    #     rule = rule.replace('"[', '[')
+                    #     rule = rule.replace(']"', ']')
+                    #     rule = rule.strip()
 
                     if not os.path.exists(target_file):
                         with open(target_file, 'w') as wf:
@@ -130,7 +146,9 @@ def ExtractKnowledge(nodes_mapping, root_index, llm, iteration=2, iteration_gap=
                     else:
                         with open(target_file, 'r') as rf:
                             # load json file
+                            print(f"target_file: {target_file}")
                             knowledge_strs = json.load(rf)
+                            print(2)
                     
                     rule = ast.literal_eval(rule)
 
@@ -139,7 +157,6 @@ def ExtractKnowledge(nodes_mapping, root_index, llm, iteration=2, iteration_gap=
                     else:
                         rules = rule
 
-                    used_rules = []
                     for rule in rules:
                         # evaluate redundancy                            
                         new_knowledge = {'source_sections':str(new_source_sections), 'rule':rule}
@@ -175,12 +192,15 @@ def ExtractKnowledge(nodes_mapping, root_index, llm, iteration=2, iteration_gap=
 
                         new_source_sections = source_sections
                 
-                except:
-                    message = "Invaid Rule."
-                    print(ERROR(message))
+                except Exception as e:
+                    message = "Invalid Rule."
+                    print(f"ERROR: {message}")
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    print(f"Exception Type: {exc_type}")
+                    print(f"Error Message: {exc_value}")
                     rules = ""
 
-                if used_rules == []:
+                if not used_rules or used_rules == []:
                     fail_time += 1
                 messages += [{'role': "function", "name":"submit_rule", 'content': used_rules}]
 
@@ -262,7 +282,7 @@ def document_split(doc_path: str, doc_name: str):
     )
 
     # try:
-    section_list = read_structured_docx(doc_path + doc_name)
+    section_list = read_structured_docx(doc_path, doc_path + doc_name)
 
     if not os.path.exists(doc_path+ "/raw"):
         os.mkdir(doc_path+ "/raw")
@@ -274,8 +294,8 @@ def document_split(doc_path: str, doc_name: str):
 
 if __name__=="__main__":
 
-    document_split("./docs/test_enmo/", "数据库故障处理应急方案.docx")
+    document_split("./docs/new_knowledge/", "Availability-VM.docx")
 
-    args_obj = DocumentExtractionArgs(backend="openai_gpt-4", doc="./docs/test_enmo")
+    args_obj = DocumentExtractionArgs(backend="openai-api", doc="./docs/new_knowledge")
 
     is_success = DocumentExtraction(args_obj)
