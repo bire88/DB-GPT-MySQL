@@ -409,7 +409,7 @@ def docs_text_split_content(
                 splited_docs = kb_file.file2text(text_splitter=text_splitter)
                 splited_doc_page_contents = []
                 for i, doc in enumerate(splited_docs):
-                    splited_doc_page_contents.append(doc.page_content)
+                    splited_doc_page_contents.append(doc.metadata)
                 kb_results.append({"file_name": kb_file.filename, "contents": splited_doc_page_contents})
         except Exception as e:
             msg = f"{kb_file.filename} 读取文件失败，错误信息是：{e}"

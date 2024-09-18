@@ -112,6 +112,8 @@ async def knowledge_base_chat(query: str = Body(..., description="用户输入",
         docs = search_docs(query, knowledge_base_name, top_k, score_threshold)
         context = "\n".join([doc.page_content for doc in docs])
 
+        print(f"搜索到{len(docs)}个相关文档")
+
         if len(docs) == 0:  # 如果没有找到相关文档，使用empty模板
             prompt_template = get_prompt_template(
                 "knowledge_base_chat", "empty")
@@ -142,6 +144,8 @@ async def knowledge_base_chat(query: str = Body(..., description="用户输入",
             base_url = request.base_url
             url = f"{base_url}knowledge_base/download_doc?" + parameters
             text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n"""
+
+            print(f"source documents to be appended: {text}")
             source_documents.append(text)
             if filename in source_documents_map:
                 source_documents_map[filename]["contents"].append(doc.page_content)

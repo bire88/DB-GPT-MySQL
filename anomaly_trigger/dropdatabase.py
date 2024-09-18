@@ -3,8 +3,9 @@ from utils.database import DB_CONFIG, SERVER_CONFIG
 
 def dropdatabase(name):
     # 连接到 "postgres" 数据库
+    print(F"DB_CONFIG: {DB_CONFIG}")
     conn = psycopg2.connect(
-        dbname="sysbench",  # 连接到默认的 "postgres" 数据库
+        dbname=DB_CONFIG['dbname'],  # 连接到默认的 "postgres" 数据库
         user=DB_CONFIG['user'],  # 替换为你的数据库用户名
         password=DB_CONFIG['password'],  # 替换为你的数据库密码
         host=DB_CONFIG['host'],  # 替换为你的数据库主机地址

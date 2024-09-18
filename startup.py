@@ -444,6 +444,7 @@ def run_webui(started_event: mp.Event = None):
 
     from server.utils import replace_ip
     replace_ip("webui/.env.serve-dev", WEBUI_SERVER["api_base_url"])
+
     cmd = ["pnpm", "run", "dev", "--port", str(WEBUI_SERVER["port"])]
     # host = WEBUI_SERVER["host"]
     # port = WEBUI_SERVER["port"]

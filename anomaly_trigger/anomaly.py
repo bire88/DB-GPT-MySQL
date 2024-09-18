@@ -42,7 +42,7 @@ def restart_postgresql():
 
         # 执行PostgreSQL重启命令
         # 注意：根据您服务器的配置，这些命令可能需要调整
-        stdin, stdout, stderr = ssh.exec_command("sudo systemctl restart postgresql-12.service")
+        stdin, stdout, stderr = ssh.exec_command("sudo systemctl restart postgresql")
         exit_status = stdout.channel.recv_exit_status()  # 阻塞直到命令执行完成
 
         if exit_status == 0:

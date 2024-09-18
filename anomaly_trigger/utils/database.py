@@ -9,21 +9,20 @@ import random
 from multiprocessing.pool import *
 
 DB_CONFIG = {
-    "dbname":"sysbench",  # 连接到默认的 "postgres" 数据库
-    "user":"test",  # 替换为你的数据库用户名
-    "password":"Test123_456",  # 替换为你的数据库密码
-    "host":"localhost",  # 替换为你的数据库主机地址
+    "dbname":"autorca",  # 连接到默认的 "postgres" 数据库
+    "user":"autorca",  # 替换为你的数据库用户名
+    "password":"Root_cause_analysis",  # 替换为你的数据库密码
+    "host":"20.197.88.176",  # 替换为你的数据库主机地址
     "port": 5432,
-    # "dbtype": "postgresql"
+    # "dbtype": "mysql"
     }
 
 SERVER_CONFIG = {
-    "host": "localhost",
+    "host": "20.197.88.176",
     "port": 22,
-    "user": 'root',
-    "password": 'xxxx'
+    "user": 'autorca',
+    "password": 'Root_cause_analysis'
 }
-
 
 def extract_node_types(json_tree):
     node_types = []
@@ -122,6 +121,7 @@ class Database():
                 write_timeout=timeout)
         elif self.args.dbtype == 'postgresql':
             if timeout > 0:
+                print(f"self.args: {self.args}")
                 conn = psycopg2.connect(database=self.args.dbname,
                                             user=self.args.user,
                                             password=self.args.password,

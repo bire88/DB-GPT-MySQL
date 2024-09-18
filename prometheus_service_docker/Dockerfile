@@ -6,6 +6,8 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+RUN pip install paramiko
+
 COPY . .
 
 CMD [ "python3", "./app.py" ]
